@@ -1,0 +1,5 @@
+- [x] Review current table booking component
+- [x] Design seat-level data structure and modal interaction
+- [x] Implement modal with seat selection and state colors
+- [x] Update table data to include seat statuses
+- [ ] Test updated table booking flow
