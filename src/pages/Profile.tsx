@@ -18,10 +18,12 @@ import {
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import { useAuth } from "../hooks/useContexts";
+import { useToast } from "../hooks/useToast";
 
 export default function Profile() {
   const navigate = useNavigate();
   const { user, logout: authLogout, isAuthenticated } = useAuth();
+  const toast = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState("info");
   const [formData, setFormData] = useState({
@@ -61,7 +63,7 @@ export default function Profile() {
 
     // TODO: Implement API call để update user profile
     // Tạm thời chỉ update local state
-    alert("Chức năng cập nhật profile đang được phát triển");
+    toast.info("Chức năng cập nhật profile đang được phát triển");
     setIsEditing(false);
   };
 

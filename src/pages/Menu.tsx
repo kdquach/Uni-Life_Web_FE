@@ -6,9 +6,11 @@ import FoodCard from "../components/FoodCard";
 import CartSummary from "../components/CartSummary";
 import { menuItems } from "../data/menuData";
 import { useCart } from "../hooks/useContexts";
+import { useToast } from "../hooks/useToast";
 
 export default function Menu() {
   const { addToCart } = useCart();
+  const toast = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchParams] = useSearchParams();
 
@@ -52,9 +54,14 @@ export default function Menu() {
         price: item.price,
         image: item.image,
       });
+      toast.success(`Đã thêm "${item.name}" vào giỏ hàng!`);
     } catch (error) {
       console.error("Failed to add to cart:", error);
-      alert("Vui lòng đăng nhập để thêm vào giỏ hàng");
+      if (error instanceof Error && error.message === "NOT_LOGGED_IN") {
+        toast.error("Vui lòng đăng nhập để thêm vào giỏ hàng");
+      } else {
+        toast.error("Không thể thêm món vào giỏ hàng");
+      }
     }
   };
 

@@ -24,7 +24,7 @@ interface CartItem {
 export default function Table() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { updateSeatInfo, clearCart } = useCart();
+  const { updateSeatInfo, clearCart, refreshCart } = useCart();
   const [tables, setTables] = useState<TableType[]>(tablesData);
   const [selectedTable, setSelectedTable] = useState<string | null>("T-01");
   const [activeTab, setActiveTab] = useState<"all" | "reservation" | "running">(
@@ -408,8 +408,9 @@ export default function Table() {
             price: item.price,
             seatInfo: item.seatInfo,
           }))}
-          onPaymentSuccess={() => {
-            clearCart();
+          onPaymentSuccess={async () => {
+            await clearCart();
+            await refreshCart(); // Đảm bảo UI giỏ hàng được cập nhật
             setIsPaymentModalOpen(false);
             setIsCartCheckoutMode(false);
             navigate("/");

@@ -48,3 +48,19 @@
   font-family: "Poppins", sans-serif !important;
   font-weight: 700 !important;
 }
+
+/* Toast animations */
+@keyframes slide-in {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}

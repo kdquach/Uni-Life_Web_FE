@@ -1,11 +1,13 @@
 import { Minus, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth, useCart } from "../hooks/useContexts";
+import { useToast } from "../hooks/useToast";
 
 export default function CartSummary() {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
   const { cartItems, updateQuantity } = useCart();
+  const toast = useToast();
 
   // Nếu chưa đăng nhập, hiển thị thông báo
   if (!isAuthenticated) {
@@ -57,11 +59,13 @@ export default function CartSummary() {
 
   const handleCheckout = () => {
     if (cartItems.length === 0) {
-      alert("Giỏ hàng trống! Vui lòng thêm món trước khi thanh toán.");
+      toast.warning("Giỏ hàng trống! Vui lòng thêm món trước khi thanh toán.");
       return;
     }
     // Chuyển sang trang Table để chọn ghế
     navigate("/table", { state: { fromCart: true, cartItems } });
+    // Hiển thị thông báo hướng dẫn
+    toast.info("Vui lòng chọn bàn và ghế cho từng món ăn");
   };
 
   return (

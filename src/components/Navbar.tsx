@@ -10,6 +10,7 @@ import {
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useContexts";
+import { useToast } from "../hooks/useToast";
 
 interface NavbarProps {
   onSearch?: (query: string) => void;
@@ -18,6 +19,7 @@ interface NavbarProps {
 export default function Navbar({ onSearch }: NavbarProps) {
   const navigate = useNavigate();
   const { user, logout: authLogout, isAuthenticated } = useAuth();
+  const toast = useToast();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -50,7 +52,7 @@ export default function Navbar({ onSearch }: NavbarProps) {
   const handleSettings = () => {
     setIsDropdownOpen(false);
     // TODO: Navigate to settings page
-    alert("Trang cài đặt đang được phát triển");
+    toast.info("Trang cài đặt đang được phát triển");
   };
 
   return (

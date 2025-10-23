@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Table, SeatStatus } from "../types/table";
 import { getSeatPositions } from "../utils/seating";
 import PaymentModal from "./PaymentModal";
+import { useToast } from "../hooks/useToast";
 
 interface SeatSelectionModalProps {
   table: Table;
@@ -39,6 +40,7 @@ export default function SeatSelectionModal({
   isCartCheckoutMode = false,
 }: SeatSelectionModalProps) {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const toast = useToast();
 
   const seatPositions = useMemo(
     () => getSeatPositions(table.seats.length, table.shape, "modal"),
@@ -77,7 +79,9 @@ export default function SeatSelectionModal({
 
   const handlePaymentSuccess = () => {
     // Sau khi thanh toán thành công, đóng modal
-    alert(`Đã đặt thành công ${selectedSeats.length} ghế tại bàn ${table.id}!`);
+    toast.success(
+      `Đã đặt thành công ${selectedSeats.length} ghế tại bàn ${table.id}!`
+    );
     onClose();
   };
 

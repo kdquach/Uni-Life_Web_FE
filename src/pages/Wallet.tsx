@@ -14,6 +14,7 @@ import {
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import { useAuth } from "../hooks/useContexts";
+import { useToast } from "../hooks/useToast";
 
 interface Transaction {
   id: string;
@@ -27,6 +28,7 @@ interface Transaction {
 export default function Wallet() {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
+  const toast = useToast();
   const [balance] = useState(500000); // Mock balance
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
@@ -82,26 +84,26 @@ export default function Wallet() {
 
   const handleDeposit = () => {
     if (!amount || parseFloat(amount) <= 0) {
-      alert("Vui lòng nhập số tiền hợp lệ");
+      toast.warning("Vui lòng nhập số tiền hợp lệ");
       return;
     }
     // TODO: Implement deposit API
-    alert(`Nạp ${formatCurrency(parseFloat(amount))} thành công!`);
+    toast.success(`Nạp ${formatCurrency(parseFloat(amount))} thành công!`);
     setShowDepositModal(false);
     setAmount("");
   };
 
   const handleWithdraw = () => {
     if (!amount || parseFloat(amount) <= 0) {
-      alert("Vui lòng nhập số tiền hợp lệ");
+      toast.warning("Vui lòng nhập số tiền hợp lệ");
       return;
     }
     if (parseFloat(amount) > balance) {
-      alert("Số dư không đủ!");
+      toast.error("Số dư không đủ!");
       return;
     }
     // TODO: Implement withdraw API
-    alert(`Rút ${formatCurrency(parseFloat(amount))} thành công!`);
+    toast.success(`Rút ${formatCurrency(parseFloat(amount))} thành công!`);
     setShowWithdrawModal(false);
     setAmount("");
   };

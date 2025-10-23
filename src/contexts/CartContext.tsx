@@ -74,8 +74,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addToCart = async (item: Omit<CartItem, "quantity">) => {
     if (!user) {
-      alert("Vui lòng đăng nhập để thêm món vào giỏ hàng");
-      return;
+      throw new Error("NOT_LOGGED_IN");
     }
 
     try {
@@ -85,7 +84,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       console.error("Failed to add to cart:", error);
-      alert("Không thể thêm món vào giỏ hàng");
+      throw new Error("ADD_TO_CART_FAILED");
     }
   };
 

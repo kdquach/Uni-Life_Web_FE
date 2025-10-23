@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { CartProvider } from "./contexts/CartContext";
+import { ToastProvider } from "./contexts/ToastContext";
 import Home from "./pages/Home";
 import Menu from "./pages/Menu";
 import Table from "./pages/Table";
@@ -13,17 +14,19 @@ function App() {
   return (
     <AuthProvider>
       <CartProvider>
-        <Router>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/" element={<Home />} />
-            <Route path="/menu" element={<Menu />} />
-            <Route path="/table" element={<Table />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/wallet" element={<Wallet />} />
-          </Routes>
-        </Router>
+        <ToastProvider>
+          <Router>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/" element={<Home />} />
+              <Route path="/menu" element={<Menu />} />
+              <Route path="/table" element={<Table />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/wallet" element={<Wallet />} />
+            </Routes>
+          </Router>
+        </ToastProvider>
       </CartProvider>
     </AuthProvider>
   );
