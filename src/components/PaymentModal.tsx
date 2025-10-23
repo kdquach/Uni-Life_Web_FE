@@ -9,6 +9,10 @@ interface PaymentModalProps {
     name: string;
     quantity: number;
     price: number;
+    seatInfo?: {
+      tableId: string;
+      seatId: string;
+    };
   }>;
   tableNumber?: string;
   onPaymentSuccess: () => void;
@@ -61,7 +65,7 @@ export default function PaymentModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-100 p-4">
       <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {paymentStatus === "pending" ? (
           <>
@@ -98,15 +102,23 @@ export default function PaymentModal({
                   {orderItems.map((item, index) => (
                     <div
                       key={index}
-                      className="flex justify-between items-center"
+                      className="flex justify-between items-start border-b border-gray-200 pb-3 last:border-0 last:pb-0"
                     >
                       <div className="flex-1">
                         <p className="text-gray-700 font-medium">{item.name}</p>
                         <p className="text-sm text-gray-500">
                           Số lượng: {item.quantity}
                         </p>
+                        {item.seatInfo && (
+                          <div className="mt-1 inline-flex items-center gap-1 bg-orange-50 px-2 py-1 rounded-lg">
+                            <span className="text-xs font-semibold text-orange-600">
+                              📍 {item.seatInfo.tableId} -{" "}
+                              {item.seatInfo.seatId}
+                            </span>
+                          </div>
+                        )}
                       </div>
-                      <p className="font-semibold text-gray-800">
+                      <p className="font-semibold text-gray-800 ml-3">
                         {formatCurrency(item.price * item.quantity)}
                       </p>
                     </div>

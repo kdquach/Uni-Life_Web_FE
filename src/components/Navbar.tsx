@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCurrentUser, logout, isAuthenticated } from "../utils/userData";
+import { useAuth } from "../hooks/useContexts";
 
 interface NavbarProps {
   onSearch?: (query: string) => void;
@@ -17,14 +17,11 @@ interface NavbarProps {
 
 export default function Navbar({ onSearch }: NavbarProps) {
   const navigate = useNavigate();
+  const { user, logout: authLogout, isAuthenticated } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState(getCurrentUser());
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Cập nhật thông tin người dùng khi component mount
-    setCurrentUser(getCurrentUser());
-
     // Đóng dropdown khi click ra ngoài
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -40,8 +37,7 @@ export default function Navbar({ onSearch }: NavbarProps) {
   }, []);
 
   const handleLogout = () => {
-    logout();
-    setCurrentUser(null);
+    authLogout();
     setIsDropdownOpen(false);
     navigate("/login");
   };
@@ -65,7 +61,7 @@ export default function Navbar({ onSearch }: NavbarProps) {
           className="w-16 h-16 flex items-center justify-center rounded-full bg-white shadow-md hover:shadow-lg transition-shadow cursor-pointer"
         >
           <img
-            src="../../public/Logo_mau.png"
+            src="/Logo_mau.png"
             alt="UniLife Logo"
             className="w-14 h-14 rounded-full object-cover"
           />
@@ -92,7 +88,7 @@ export default function Navbar({ onSearch }: NavbarProps) {
         </button>
 
         {/* Avatar với Dropdown */}
-        {isAuthenticated() && currentUser ? (
+        {isAuthenticated && user ? (
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -101,10 +97,10 @@ export default function Navbar({ onSearch }: NavbarProps) {
               <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-200">
                 <img
                   src={
-                    currentUser.avatar ||
+                    user.avatar ||
                     "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=100"
                   }
-                  alt={currentUser.fullName}
+                  alt={user.fullName}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -120,10 +116,8 @@ export default function Navbar({ onSearch }: NavbarProps) {
               <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                 {/* User Info */}
                 <div className="px-4 py-3 border-b border-gray-100">
-                  <p className="font-semibold text-gray-800">
-                    {currentUser.fullName}
-                  </p>
-                  <p className="text-sm text-gray-500">{currentUser.email}</p>
+                  <p className="font-semibold text-gray-800">{user.fullName}</p>
+                  <p className="text-sm text-gray-500">{user.email}</p>
                 </div>
 
                 {/* Menu Items */}

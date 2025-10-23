@@ -28,7 +28,7 @@ export default function FoodCard({
       </div>
 
       <div className="p-5">
-        <h3 className="text-lg font-bold text-gray-800 mb-1">{name}</h3>
+        <h3 className="text-lg font-heading text-gray-800 mb-1">{name}</h3>
         <p className="text-sm text-gray-500 mb-3 line-clamp-2 min-h-[40px]">
           {description}
         </p>

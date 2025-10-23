@@ -1,57 +1,30 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import FoodCard from "../components/FoodCard";
 import CartSummary from "../components/CartSummary";
-import { menuItems, defaultCartItems } from "../data/menuData";
+import { menuItems } from "../data/menuData";
+import { useCart } from "../hooks/useContexts";
 
 export default function Home() {
   const navigate = useNavigate();
-  const [cartItems, setCartItems] = useState(defaultCartItems);
+  const { addToCart } = useCart();
 
-  const handleAddToCart = (id: number) => {
+  const handleAddToCart = async (id: number) => {
     const item = menuItems.find((m) => m.id === id);
     if (!item) return;
 
-    const existingItem = cartItems.find((c) => c.id === id);
-    if (existingItem) {
-      setCartItems(
-        cartItems.map((c) =>
-          c.id === id ? { ...c, quantity: c.quantity + 1 } : c
-        )
-      );
-    } else {
-      setCartItems([
-        ...cartItems,
-        {
-          id: item.id,
-          name: item.name,
-          price: item.price,
-          quantity: 1,
-          image: item.image,
-        },
-      ]);
+    try {
+      await addToCart({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        image: item.image,
+      });
+    } catch (error) {
+      console.error("Failed to add to cart:", error);
+      alert("Vui lòng đăng nhập để thêm vào giỏ hàng");
     }
-  };
-
-  const handleUpdateQuantity = (id: number, delta: number) => {
-    setCartItems(
-      cartItems
-        .map((item) => {
-          if (item.id === id) {
-            const newQuantity = item.quantity + delta;
-            return newQuantity > 0 ? { ...item, quantity: newQuantity } : item;
-          }
-          return item;
-        })
-        .filter((item) => item.quantity > 0)
-    );
-  };
-
-  const handleCheckout = () => {
-    // Reset giỏ hàng sau khi thanh toán thành công
-    setCartItems([]);
   };
 
   return (
@@ -96,17 +69,7 @@ export default function Home() {
           </div>
         </div>
 
-        <CartSummary
-          user={{
-            name: "Rachel foster",
-            location: "Fluttertop",
-            avatar:
-              "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=100",
-          }}
-          items={cartItems}
-          onUpdateQuantity={handleUpdateQuantity}
-          onCheckout={handleCheckout}
-        />
+        <CartSummary />
       </div>
     </div>
   );

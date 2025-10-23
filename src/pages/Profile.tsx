@@ -17,17 +17,11 @@ import {
 } from "lucide-react";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
-import {
-  getCurrentUser,
-  logout,
-  updateUserProfile,
-  getUserByEmail,
-  User as UserType,
-} from "../utils/userData";
+import { useAuth } from "../hooks/useContexts";
 
 export default function Profile() {
   const navigate = useNavigate();
-  const currentUser = getCurrentUser();
+  const { user, logout: authLogout, isAuthenticated } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState("info");
   const [formData, setFormData] = useState({
@@ -36,25 +30,22 @@ export default function Profile() {
     address: "",
     avatar: "",
   });
-  const [userFullData, setUserFullData] = useState<UserType | null>(null);
 
   useEffect(() => {
-    if (!currentUser) {
+    // Redirect nếu chưa đăng nhập
+    if (!isAuthenticated || !user) {
       navigate("/login");
       return;
     }
 
-    const fullData = getUserByEmail(currentUser.email);
-    if (fullData) {
-      setUserFullData(fullData);
-      setFormData({
-        fullName: fullData.fullName,
-        phone: fullData.phone || "",
-        address: fullData.address || "",
-        avatar: fullData.avatar || "",
-      });
-    }
-  }, [navigate, currentUser]);
+    // Load dữ liệu user vào form
+    setFormData({
+      fullName: user.fullName,
+      phone: user.phone || "",
+      address: user.address || "",
+      avatar: user.avatar || "",
+    });
+  }, [navigate, isAuthenticated, user]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -65,35 +56,21 @@ export default function Profile() {
     });
   };
 
-  const handleSave = () => {
-    if (!currentUser) return;
+  const handleSave = async () => {
+    if (!user) return;
 
-    const result = updateUserProfile(currentUser.email, {
-      fullName: formData.fullName,
-      phone: formData.phone,
-      address: formData.address,
-      avatar: formData.avatar,
-    });
-
-    if (result.success) {
-      alert(result.message);
-      setIsEditing(false);
-      // Refresh user data
-      const updatedData = getUserByEmail(currentUser.email);
-      if (updatedData) {
-        setUserFullData(updatedData);
-      }
-    } else {
-      alert(result.message);
-    }
+    // TODO: Implement API call để update user profile
+    // Tạm thời chỉ update local state
+    alert("Chức năng cập nhật profile đang được phát triển");
+    setIsEditing(false);
   };
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await authLogout();
     navigate("/login");
   };
 
-  if (!currentUser || !userFullData) {
+  if (!isAuthenticated || !user) {
     return null;
   }
 
@@ -129,11 +106,11 @@ export default function Profile() {
                     <div className="w-40 h-40 rounded-3xl border-4 border-white shadow-xl overflow-hidden bg-white">
                       <img
                         src={
-                          userFullData.avatar ||
+                          user.avatar ||
                           "https://ui-avatars.com/api/?name=" +
-                            encodeURIComponent(userFullData.fullName)
+                            encodeURIComponent(user.fullName)
                         }
-                        alt={userFullData.fullName}
+                        alt={user.fullName}
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -147,11 +124,11 @@ export default function Profile() {
                   {/* Name & Email */}
                   <div className="mb-4">
                     <h1 className="text-3xl font-bold text-gray-800 mb-1">
-                      {userFullData.fullName}
+                      {user.fullName}
                     </h1>
                     <p className="text-gray-500 flex items-center gap-2">
                       <Mail className="w-4 h-4" />
-                      {userFullData.email}
+                      {user.email}
                     </p>
                   </div>
                 </div>
@@ -171,10 +148,10 @@ export default function Profile() {
                         onClick={() => {
                           setIsEditing(false);
                           setFormData({
-                            fullName: userFullData.fullName,
-                            phone: userFullData.phone || "",
-                            address: userFullData.address || "",
-                            avatar: userFullData.avatar || "",
+                            fullName: user.fullName,
+                            phone: user.phone || "",
+                            address: user.address || "",
+                            avatar: user.avatar || "",
                           });
                         }}
                         className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold flex items-center gap-2 hover:bg-gray-200 transition-colors"
@@ -267,9 +244,7 @@ export default function Profile() {
                       ) : (
                         <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl">
                           <User className="w-5 h-5 text-gray-400" />
-                          <span className="text-gray-700">
-                            {userFullData.fullName}
-                          </span>
+                          <span className="text-gray-700">{user.fullName}</span>
                         </div>
                       )}
                     </div>
@@ -281,9 +256,7 @@ export default function Profile() {
                       </label>
                       <div className="flex items-center gap-3 px-4 py-3 bg-gray-100 rounded-xl cursor-not-allowed">
                         <Mail className="w-5 h-5 text-gray-400" />
-                        <span className="text-gray-500">
-                          {userFullData.email}
-                        </span>
+                        <span className="text-gray-500">{user.email}</span>
                         <span className="ml-auto text-xs text-gray-400">
                           Không thể thay đổi
                         </span>
@@ -308,7 +281,7 @@ export default function Profile() {
                         <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl">
                           <Phone className="w-5 h-5 text-gray-400" />
                           <span className="text-gray-700">
-                            {userFullData.phone || "Chưa cập nhật"}
+                            {user.phone || "Chưa cập nhật"}
                           </span>
                         </div>
                       )}
@@ -332,7 +305,7 @@ export default function Profile() {
                         <div className="flex items-start gap-3 px-4 py-3 bg-gray-50 rounded-xl">
                           <MapPin className="w-5 h-5 text-gray-400 mt-0.5" />
                           <span className="text-gray-700">
-                            {userFullData.address || "Chưa cập nhật"}
+                            {user.address || "Chưa cập nhật"}
                           </span>
                         </div>
                       )}
@@ -346,7 +319,9 @@ export default function Profile() {
                       <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl">
                         <Calendar className="w-5 h-5 text-gray-400" />
                         <span className="text-gray-700">
-                          {formatDate(userFullData.createdAt)}
+                          {user.createdAt
+                            ? formatDate(user.createdAt)
+                            : "Không rõ"}
                         </span>
                       </div>
                     </div>

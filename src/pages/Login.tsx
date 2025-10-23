@@ -1,28 +1,39 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { login, initDefaultUsers } from "../utils/userData";
+import { useAuth } from "../hooks/useContexts";
+import { useCart } from "../hooks/useContexts";
 
 export default function Login() {
   const navigate = useNavigate();
+  const { login: authLogin } = useAuth();
+  const { setUser: setCartUser } = useCart();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    // Khởi tạo dữ liệu người dùng mặc định
-    initDefaultUsers();
-  }, []);
-
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setIsLoading(true);
 
-    const user = login(email, password);
+    try {
+      const result = await authLogin(email, password);
 
-    if (user) {
-      navigate("/");
-    } else {
-      setError("Email hoặc mật khẩu không đúng");
+      if (result.success) {
+        // Sync user to cart context
+        const currentUser = JSON.parse(
+          localStorage.getItem("currentUser") || "null"
+        );
+        if (currentUser) {
+          setCartUser(currentUser);
+        }
+        navigate("/");
+      } else {
+        setError(result.message || "Đăng nhập thất bại");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -67,9 +78,10 @@ export default function Login() {
 
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-4 rounded-2xl font-bold text-lg hover:shadow-xl hover:shadow-orange-500/30 transition-all"
+            disabled={isLoading}
+            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-4 rounded-2xl font-bold text-lg hover:shadow-xl hover:shadow-orange-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Đăng nhập
+            {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
           </button>
         </form>
 

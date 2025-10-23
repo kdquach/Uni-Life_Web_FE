@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { register } from "../utils/userData";
+import { useAuth } from "../hooks/useContexts";
 
 export default function Register() {
   const navigate = useNavigate();
+  const { register: authRegister } = useAuth();
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -12,6 +13,7 @@ export default function Register() {
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -20,7 +22,7 @@ export default function Register() {
     });
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSuccess("");
@@ -36,20 +38,25 @@ export default function Register() {
       return;
     }
 
-    // Đăng ký người dùng
-    const result = register(
-      formData.fullName,
-      formData.email,
-      formData.password
-    );
+    setIsLoading(true);
 
-    if (result.success) {
-      setSuccess(result.message + " Chuyển đến trang đăng nhập...");
-      setTimeout(() => {
-        navigate("/login");
-      }, 2000);
-    } else {
-      setError(result.message);
+    try {
+      const result = await authRegister(
+        formData.fullName,
+        formData.email,
+        formData.password
+      );
+
+      if (result.success) {
+        setSuccess(result.message + " Chuyển đến trang đăng nhập...");
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000);
+      } else {
+        setError(result.message || "Đăng ký thất bại");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -127,9 +134,10 @@ export default function Register() {
 
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-4 rounded-2xl font-bold text-lg hover:shadow-xl hover:shadow-orange-500/30 transition-all"
+            disabled={isLoading}
+            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-4 rounded-2xl font-bold text-lg hover:shadow-xl hover:shadow-orange-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Đăng ký
+            {isLoading ? "Đang đăng ký..." : "Đăng ký"}
           </button>
         </form>
 

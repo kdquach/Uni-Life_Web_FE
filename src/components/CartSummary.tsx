@@ -1,37 +1,56 @@
 import { Minus, Plus } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import PaymentModal from "./PaymentModal";
+import FoodSeatSelectionModal from "./FoodSeatSelectionModal";
+import { useAuth, useCart } from "../hooks/useContexts";
 
-interface CartItem {
-  id: number;
-  name: string;
-  price: number;
-  quantity: number;
-  image: string;
-}
-
-interface CartSummaryProps {
-  user: {
-    name: string;
-    location: string;
-    avatar: string;
-  };
-  items: CartItem[];
-  onUpdateQuantity: (id: number, delta: number) => void;
-  onCheckout: () => void;
-  tableNumber?: string;
-}
-
-export default function CartSummary({
-  user,
-  items,
-  onUpdateQuantity,
-  onCheckout,
-  tableNumber,
-}: CartSummaryProps) {
+export default function CartSummary() {
+  const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
+  const { cartItems, updateQuantity, clearCart, updateSeatInfo } = useCart();
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isSeatSelectionOpen, setIsSeatSelectionOpen] = useState(false);
+  const [itemsWithSeats, setItemsWithSeats] = useState<typeof cartItems>([]);
 
-  const subtotal = items.reduce(
+  // Nếu chưa đăng nhập, hiển thị thông báo
+  if (!isAuthenticated) {
+    return (
+      <div className="w-96 bg-white rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.12)] p-6 h-fit sticky top-6">
+        <div className="text-center py-8">
+          <div className="mb-4">
+            <svg
+              className="w-20 h-20 mx-auto text-gray-300"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+              />
+            </svg>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-700 mb-2">
+            Vui lòng đăng nhập
+          </h3>
+          <p className="text-gray-500 text-sm mb-6">
+            Bạn cần đăng nhập để xem giỏ hàng và đặt món
+          </p>
+          <button
+            onClick={() => navigate("/login")}
+            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all"
+          >
+            Đăng nhập ngay
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const subtotal = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
@@ -43,16 +62,41 @@ export default function CartSummary({
     value.toLocaleString("vi-VN", { style: "currency", currency: "VND" });
 
   const handleCheckout = () => {
-    if (items.length === 0) {
+    if (cartItems.length === 0) {
       alert("Giỏ hàng trống! Vui lòng thêm món trước khi thanh toán.");
       return;
     }
+    console.log("Opening seat selection with items:", cartItems);
+    // Mở modal chọn ghế trước
+    setIsSeatSelectionOpen(true);
+  };
+
+  const handleSeatSelectionComplete = (
+    itemsWithSeats: Array<{
+      id: number;
+      name: string;
+      price: number;
+      quantity: number;
+      image: string;
+      seatInfo?: { tableId: string; seatId: string };
+    }>
+  ) => {
+    // Lưu thông tin ghế vào context
+    itemsWithSeats.forEach((item) => {
+      if (item.seatInfo) {
+        updateSeatInfo(item.id, item.seatInfo);
+      }
+    });
+    setItemsWithSeats(itemsWithSeats);
+    // Sau khi chọn ghế xong, mở modal thanh toán
     setIsPaymentModalOpen(true);
   };
 
-  const handlePaymentSuccess = () => {
-    // Reset giỏ hàng và gọi callback
-    onCheckout();
+  const handlePaymentSuccess = async () => {
+    // Reset giỏ hàng
+    await clearCart();
+    setIsPaymentModalOpen(false);
+    setItemsWithSeats([]);
   };
 
   return (
@@ -71,14 +115,17 @@ export default function CartSummary({
       <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 mb-6 flex items-center gap-3">
         <div className="w-12 h-12 rounded-full overflow-hidden">
           <img
-            src={user.avatar}
-            alt={user.name}
+            src={
+              user?.avatar ||
+              "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=100"
+            }
+            alt={user?.fullName}
             className="w-full h-full object-cover"
           />
         </div>
         <div>
-          <h3 className="font-bold text-gray-800">{user.name}</h3>
-          <p className="text-sm text-gray-500">{user.location}</p>
+          <h3 className="font-bold text-gray-800">{user?.fullName}</h3>
+          <p className="text-sm text-gray-500">{user?.address || "Việt Nam"}</p>
         </div>
       </div>
 
@@ -86,7 +133,7 @@ export default function CartSummary({
       <div className="mb-6">
         <h3 className="font-bold text-gray-800 mb-4">Đơn hàng của bạn</h3>
         <div className="space-y-4">
-          {items.map((item) => (
+          {cartItems.map((item) => (
             <div key={item.id} className="flex items-start gap-3">
               <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
                 <img
@@ -103,7 +150,7 @@ export default function CartSummary({
 
                 <div className="flex items-center gap-2 mt-2">
                   <button
-                    onClick={() => onUpdateQuantity(item.id, -1)}
+                    onClick={() => updateQuantity(item.id, -1)}
                     className="w-6 h-6 rounded-full bg-orange-500 text-white flex items-center justify-center hover:bg-orange-600 transition-colors"
                   >
                     <Minus className="w-3 h-3" />
@@ -114,7 +161,7 @@ export default function CartSummary({
                   </span>
 
                   <button
-                    onClick={() => onUpdateQuantity(item.id, 1)}
+                    onClick={() => updateQuantity(item.id, 1)}
                     className="w-6 h-6 rounded-full bg-orange-500 text-white flex items-center justify-center hover:bg-orange-600 transition-colors"
                   >
                     <Plus className="w-3 h-3" />
@@ -161,9 +208,16 @@ export default function CartSummary({
         isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}
         totalAmount={total}
-        orderItems={items}
-        tableNumber={tableNumber}
+        orderItems={itemsWithSeats.length > 0 ? itemsWithSeats : cartItems}
         onPaymentSuccess={handlePaymentSuccess}
+      />
+
+      {/* Seat Selection Modal */}
+      <FoodSeatSelectionModal
+        isOpen={isSeatSelectionOpen}
+        onClose={() => setIsSeatSelectionOpen(false)}
+        cartItems={cartItems}
+        onComplete={handleSeatSelectionComplete}
       />
     </div>
   );
