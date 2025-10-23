@@ -1,17 +1,11 @@
 import { Minus, Plus } from "lucide-react";
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import PaymentModal from "./PaymentModal";
-import FoodSeatSelectionModal from "./FoodSeatSelectionModal";
 import { useAuth, useCart } from "../hooks/useContexts";
 
 export default function CartSummary() {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
-  const { cartItems, updateQuantity, clearCart, updateSeatInfo } = useCart();
-  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-  const [isSeatSelectionOpen, setIsSeatSelectionOpen] = useState(false);
-  const [itemsWithSeats, setItemsWithSeats] = useState<typeof cartItems>([]);
+  const { cartItems, updateQuantity } = useCart();
 
   // Nếu chưa đăng nhập, hiển thị thông báo
   if (!isAuthenticated) {
@@ -66,37 +60,8 @@ export default function CartSummary() {
       alert("Giỏ hàng trống! Vui lòng thêm món trước khi thanh toán.");
       return;
     }
-    console.log("Opening seat selection with items:", cartItems);
-    // Mở modal chọn ghế trước
-    setIsSeatSelectionOpen(true);
-  };
-
-  const handleSeatSelectionComplete = (
-    itemsWithSeats: Array<{
-      id: number;
-      name: string;
-      price: number;
-      quantity: number;
-      image: string;
-      seatInfo?: { tableId: string; seatId: string };
-    }>
-  ) => {
-    // Lưu thông tin ghế vào context
-    itemsWithSeats.forEach((item) => {
-      if (item.seatInfo) {
-        updateSeatInfo(item.id, item.seatInfo);
-      }
-    });
-    setItemsWithSeats(itemsWithSeats);
-    // Sau khi chọn ghế xong, mở modal thanh toán
-    setIsPaymentModalOpen(true);
-  };
-
-  const handlePaymentSuccess = async () => {
-    // Reset giỏ hàng
-    await clearCart();
-    setIsPaymentModalOpen(false);
-    setItemsWithSeats([]);
+    // Chuyển sang trang Table để chọn ghế
+    navigate("/table", { state: { fromCart: true, cartItems } });
   };
 
   return (
@@ -202,23 +167,6 @@ export default function CartSummary() {
       >
         Thanh toán ngay
       </button>
-
-      {/* Payment Modal */}
-      <PaymentModal
-        isOpen={isPaymentModalOpen}
-        onClose={() => setIsPaymentModalOpen(false)}
-        totalAmount={total}
-        orderItems={itemsWithSeats.length > 0 ? itemsWithSeats : cartItems}
-        onPaymentSuccess={handlePaymentSuccess}
-      />
-
-      {/* Seat Selection Modal */}
-      <FoodSeatSelectionModal
-        isOpen={isSeatSelectionOpen}
-        onClose={() => setIsSeatSelectionOpen(false)}
-        cartItems={cartItems}
-        onComplete={handleSeatSelectionComplete}
-      />
     </div>
   );
 }

@@ -1,18 +1,63 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import TableBookingGrid from "../components/TableBookingGrid";
 import { tablesData } from "../data/tableData";
 import SeatSelectionModal from "../components/SeatSelectionModal";
+import PaymentModal from "../components/PaymentModal";
 import { Seat, Table as TableType, TableStatus } from "../types/table";
+import { useCart } from "../hooks/useContexts";
+
+interface CartItem {
+  id: number;
+  name: string;
+  price: number;
+  quantity: number;
+  image: string;
+  seatInfo?: {
+    tableId: string;
+    seatId: string;
+  };
+}
 
 export default function Table() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { updateSeatInfo, clearCart } = useCart();
   const [tables, setTables] = useState<TableType[]>(tablesData);
   const [selectedTable, setSelectedTable] = useState<string | null>("T-01");
   const [activeTab, setActiveTab] = useState<"all" | "reservation" | "running">(
     "all"
   );
   const [modalTableId, setModalTableId] = useState<string | null>(null);
+
+  // Cart checkout mode states
+  const [isCartCheckoutMode, setIsCartCheckoutMode] = useState(false);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [currentFoodIndex, setCurrentFoodIndex] = useState(0);
+  const [selectedSeatsForCart, setSelectedSeatsForCart] = useState<CartItem[]>(
+    []
+  );
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+
+  // Initialize cart checkout mode from location state
+  useEffect(() => {
+    const state = location.state as {
+      fromCart?: boolean;
+      cartItems?: CartItem[];
+    };
+    if (state?.fromCart && state?.cartItems) {
+      setIsCartCheckoutMode(true);
+      setCartItems(state.cartItems);
+      setSelectedSeatsForCart(state.cartItems.map((item) => ({ ...item })));
+      setCurrentFoodIndex(0);
+    }
+  }, [location.state]);
+
+  const currentCartItem = isCartCheckoutMode
+    ? selectedSeatsForCart[currentFoodIndex]
+    : null;
 
   const selectedTableData = useMemo(
     () => tables.find((table) => table.id === selectedTable) || null,
@@ -48,6 +93,7 @@ export default function Table() {
   };
 
   const handleToggleSeat = (tableId: string, seatId: string) => {
+    // Logic bình thường cho table page - chỉ toggle seat status
     setTables((prevTables) =>
       prevTables.map((table) => {
         if (table.id !== tableId) {
@@ -77,6 +123,39 @@ export default function Table() {
         };
       })
     );
+  };
+
+  // Callback khi nhấn "Đặt ghế" trong cart checkout mode
+  const handleCartReserveComplete = (
+    selectedSeats: { tableId: string; seatId: string }[]
+  ) => {
+    if (selectedSeats.length === 0) return;
+
+    // Lấy ghế đầu tiên (vì mỗi món chỉ chọn 1 ghế)
+    const seatInfo = selectedSeats[0];
+
+    // Cập nhật thông tin ghế cho món hiện tại
+    const updatedSeats = [...selectedSeatsForCart];
+    updatedSeats[currentFoodIndex] = {
+      ...updatedSeats[currentFoodIndex],
+      seatInfo,
+    };
+    setSelectedSeatsForCart(updatedSeats);
+
+    // Lưu vào context
+    updateSeatInfo(updatedSeats[currentFoodIndex].id, seatInfo);
+
+    // Đóng modal và reset table seats
+    setModalTableId(null);
+    setTables(tablesData); // Reset về trạng thái ban đầu
+
+    // Chuyển sang món tiếp theo hoặc thanh toán
+    if (currentFoodIndex < cartItems.length - 1) {
+      setCurrentFoodIndex(currentFoodIndex + 1);
+    } else {
+      // Đã chọn xong tất cả, mở modal thanh toán
+      setIsPaymentModalOpen(true);
+    }
   };
 
   const handleSelectTable = (tableId: string, openModal = true) => {
@@ -109,6 +188,53 @@ export default function Table() {
 
           <div className="flex-1">
             <Navbar />
+
+            {/* Cart Checkout Mode Banner */}
+            {isCartCheckoutMode && currentCartItem && (
+              <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl shadow-lg p-6 mb-6 text-white">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-20 h-20 rounded-xl overflow-hidden bg-white shadow-md">
+                      <img
+                        src={currentCartItem.image}
+                        alt={currentCartItem.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold mb-1">
+                        Chọn ghế cho: {currentCartItem.name}
+                      </h3>
+                      <p className="text-orange-100">
+                        Món {currentFoodIndex + 1} / {cartItems.length} - Chọn
+                        bàn và ghế bên dưới
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setIsCartCheckoutMode(false);
+                      navigate("/");
+                    }}
+                    className="px-6 py-3 bg-white/20 hover:bg-white/30 rounded-xl font-bold transition-all"
+                  >
+                    Hủy
+                  </button>
+                </div>
+
+                {/* Progress bar */}
+                <div className="mt-4 bg-white/20 rounded-full h-2">
+                  <div
+                    className="bg-white rounded-full h-2 transition-all duration-300"
+                    style={{
+                      width: `${
+                        ((currentFoodIndex + 1) / cartItems.length) * 100
+                      }%`,
+                    }}
+                  />
+                </div>
+              </div>
+            )}
 
             <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
               <div className="flex items-center justify-between mb-6">
@@ -250,8 +376,44 @@ export default function Table() {
       {modalTable && (
         <SeatSelectionModal
           table={modalTable}
-          onClose={() => setModalTableId(null)}
+          onClose={() => {
+            setModalTableId(null);
+            // Reset table seats khi đóng modal trong cart mode
+            if (isCartCheckoutMode) {
+              setTables(tablesData);
+            }
+          }}
           onToggleSeat={(seatId) => handleToggleSeat(modalTable.id, seatId)}
+          isCartCheckoutMode={isCartCheckoutMode}
+          onReserveComplete={
+            isCartCheckoutMode ? handleCartReserveComplete : undefined
+          }
+        />
+      )}
+
+      {/* Payment Modal for Cart Checkout */}
+      {isPaymentModalOpen && (
+        <PaymentModal
+          isOpen={true}
+          onClose={() => setIsPaymentModalOpen(false)}
+          totalAmount={
+            selectedSeatsForCart.reduce(
+              (sum, item) => sum + item.price * item.quantity,
+              0
+            ) * 1.1
+          }
+          orderItems={selectedSeatsForCart.map((item) => ({
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+            seatInfo: item.seatInfo,
+          }))}
+          onPaymentSuccess={() => {
+            clearCart();
+            setIsPaymentModalOpen(false);
+            setIsCartCheckoutMode(false);
+            navigate("/");
+          }}
         />
       )}
     </>

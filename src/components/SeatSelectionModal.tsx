@@ -7,6 +7,10 @@ interface SeatSelectionModalProps {
   table: Table;
   onClose: () => void;
   onToggleSeat: (seatId: string) => void;
+  onReserveComplete?: (
+    selectedSeats: { tableId: string; seatId: string }[]
+  ) => void;
+  isCartCheckoutMode?: boolean;
 }
 
 const seatStatusClasses: Record<SeatStatus, string> = {
@@ -31,6 +35,8 @@ export default function SeatSelectionModal({
   table,
   onClose,
   onToggleSeat,
+  onReserveComplete,
+  isCartCheckoutMode = false,
 }: SeatSelectionModalProps) {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
@@ -53,6 +59,19 @@ export default function SeatSelectionModal({
 
   const handleReserveSeats = () => {
     if (selectedSeats.length === 0) return;
+
+    // Nếu đang ở cart checkout mode, gọi callback để xử lý bên ngoài
+    if (isCartCheckoutMode && onReserveComplete) {
+      const seatsInfo = selectedSeats.map((seat) => ({
+        tableId: table.id,
+        seatId: seat.id,
+      }));
+      onReserveComplete(seatsInfo);
+      onClose(); // Đóng modal
+      return;
+    }
+
+    // Mode bình thường: mở payment modal
     setIsPaymentModalOpen(true);
   };
 
@@ -64,7 +83,7 @@ export default function SeatSelectionModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
+      className="fixed inset-0 z-10 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
       onClick={onClose}
     >
       <div
