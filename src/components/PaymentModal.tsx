@@ -159,29 +159,26 @@ export default function PaymentModal({
 
                 {/* Payment Methods */}
                 <div className="flex justify-center gap-4 mt-6">
-                  <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-lg">
+                  <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
                     <img
-                      src="https://upload.wikimedia.org/wikipedia/commons/4/41/VietQR_Logo.png"
+                      src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/VietQR_Logo.svg/1200px-VietQR_Logo.svg.png?20250310160241"
                       alt="VietQR"
-                      className="w-6 h-6"
-                      onError={(e) => {
-                        e.currentTarget.src =
-                          "https://via.placeholder.com/24?text=VQR";
-                      }}
+                      className="h-8 w-auto object-contain"
                     />
-                    <span className="text-sm font-medium text-blue-900">
-                      VietQR
-                    </span>
                   </div>
-                  <div className="flex items-center gap-2 px-4 py-2 bg-green-50 rounded-lg">
-                    <span className="text-sm font-medium text-green-900">
-                      MoMo
-                    </span>
+                  <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
+                    <img
+                      src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-MoMo-Square.png"
+                      alt="MoMo"
+                      className="h-8 w-auto object-contain"
+                    />
                   </div>
-                  <div className="flex items-center gap-2 px-4 py-2 bg-indigo-50 rounded-lg">
-                    <span className="text-sm font-medium text-indigo-900">
-                      ZaloPay
-                    </span>
+                  <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
+                    <img
+                      src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-ZaloPay-Square.png"
+                      alt="ZaloPay"
+                      className="h-8 w-auto object-contain"
+                    />
                   </div>
                 </div>
               </div>

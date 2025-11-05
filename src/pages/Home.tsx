@@ -42,29 +42,75 @@ export default function Home() {
         <div className="flex-1">
           <Navbar />
 
-          <div className="bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 rounded-3xl p-8 mb-8 relative overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.18)] ring-1 ring-black/5">
+          <div className="bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 rounded-3xl p-12 mb-8 relative overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.18)] ring-1 ring-black/5 min-h-[400px]">
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnoiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLW9wYWNpdHk9Ii4xIiBzdHJva2Utd2lkdGg9IjIiLz48L2c+PC9zdmc+')] opacity-20"></div>
 
-            <div className="relative z-10 max-w-xl">
-              <h1 className="text-5xl font-bold text-white mb-4 leading-tight">
-                Món ngon khiến
-                <br />
-                bạn hạnh phúc
-              </h1>
-              <p className="text-white/90 text-lg mb-6">
-                Hãy nâng tầm niềm vui của bạn
-                <br />
-                với một bữa ăn thật ngon
-              </p>
-              <button
-                onClick={() => navigate("/menu")}
-                className="bg-white text-orange-600 px-8 py-4 rounded-xl font-bold text-lg hover:shadow-2xl transition-all hover:scale-105"
-              >
-                Khám phá
-              </button>
+            <div className="relative z-10 flex items-center justify-between">
+              {/* Left Content */}
+              <div className="max-w-lg">
+                <h1 className="text-6xl font-bold text-white mb-4 leading-tight">
+                  UniLife
+                  <br />
+                  Smart Ecosystem
+                </h1>
+                <p className="text-white/90 text-lg mb-8 leading-relaxed">
+                  Lets Take your happiness to the next
+                  <br />
+                  level with a great tasty meal
+                </p>
+                <button
+                  onClick={() => navigate("/menu")}
+                  className="bg-white text-orange-600 px-10 py-4 rounded-xl font-bold text-lg hover:shadow-2xl transition-all hover:scale-105"
+                >
+                  Khám phá
+                </button>
+              </div>
+
+              {/* Right - Food Images */}
+              <div className="relative w-[600px] h-[400px]">
+                {/* Center Large Image - Steak */}
+                <div className="absolute top-0 right-16 w-80 h-80 rounded-full bg-white shadow-2xl overflow-hidden transform hover:scale-105 transition-transform z-30">
+                  <img
+                    src="https://images.unsplash.com/photo-1600891964092-4316c288032e?w=500&h=500&fit=crop"
+                    alt="Steak"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                {/* Bottom Right - Pizza */}
+                <div className="absolute bottom-0 right-0 w-60 h-60 rounded-full bg-white shadow-2xl overflow-hidden transform hover:scale-105 transition-transform z-20">
+                  <img
+                    src="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=500&h=500&fit=crop"
+                    alt="Pizza"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                {/* Top Left - Roasted Chicken */}
+                <div className="absolute top-4 left-0 w-60 h-60 rounded-full bg-white shadow-2xl overflow-hidden transform hover:scale-105 transition-transform z-20">
+                  <img
+                    src="https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=500&h=500&fit=crop"
+                    alt="Roasted Chicken"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                {/* Bottom Left - Noodles */}
+                <div className="absolute bottom-4 left-8 w-52 h-52 rounded-full bg-white shadow-2xl overflow-hidden transform hover:scale-105 transition-transform z-10">
+                  <img
+                    src="https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?w=500&h=500&fit=crop"
+                    alt="Noodles"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
             </div>
 
+            {/* Decorative blur circles */}
             <div className="absolute -right-12 -top-12 w-96 h-96 opacity-20">
+              <div className="w-full h-full rounded-full bg-white blur-3xl"></div>
+            </div>
+            <div className="absolute -left-12 -bottom-12 w-64 h-64 opacity-10">
               <div className="w-full h-full rounded-full bg-white blur-3xl"></div>
             </div>
           </div>
