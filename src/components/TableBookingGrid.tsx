@@ -49,13 +49,13 @@ const getStatusBackground = (status: Table["status"]) => {
 const getTableSize = (shape: Table["shape"]) => {
   switch (shape) {
     case "small":
-      return "w-32 h-24";
+      return "w-24 h-20 sm:w-28 sm:h-22 lg:w-32 lg:h-24";
     case "medium":
-      return "w-40 h-28";
+      return "w-32 h-24 sm:w-36 sm:h-26 lg:w-40 lg:h-28";
     case "large":
-      return "w-60 h-28";
+      return "w-48 h-24 sm:w-52 sm:h-26 lg:w-60 lg:h-28";
     default:
-      return "w-32 h-24";
+      return "w-24 h-20 sm:w-28 sm:h-22 lg:w-32 lg:h-24";
   }
 };
 
@@ -65,7 +65,7 @@ export default function TableBookingGrid({
   onSelectTable,
 }: TableBookingGridProps) {
   return (
-    <div className="grid grid-cols-3 gap-10 p-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-10 p-4 sm:p-6 lg:p-8">
       {tables.map((table) => {
         const seatPositions = getSeatPositions(
           table.seats.length,
@@ -86,13 +86,13 @@ export default function TableBookingGrid({
                   table.status
                 )} ${getStatusBorder(
                   table.status
-                )} border-[3px] rounded-xl flex flex-col items-center justify-center transition-all hover:scale-105 shadow-lg shadow-black/10 backdrop-blur ${
+                )} border-2 sm:border-[3px] rounded-lg sm:rounded-xl flex flex-col items-center justify-center transition-all hover:scale-105 shadow-lg shadow-black/10 backdrop-blur ${
                   selectedTable === table.id
-                    ? "ring-4 ring-orange-500 ring-offset-4 ring-offset-white"
+                    ? "ring-2 sm:ring-4 ring-orange-500 ring-offset-2 sm:ring-offset-4 ring-offset-white"
                     : "ring-0"
                 }`}
               >
-                <span className="text-white/90 font-semibold text-lg tracking-wide">
+                <span className="text-white/90 font-semibold text-base sm:text-lg tracking-wide">
                   {table.id}
                 </span>
                 <span className="text-white/60 text-xs">
@@ -105,7 +105,7 @@ export default function TableBookingGrid({
                 return (
                   <div
                     key={seat.id}
-                    className={`absolute w-6 h-6 rounded-full border-[3px] border-white shadow-md ${
+                    className={`absolute w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 sm:border-[3px] border-white shadow-md ${
                       seatStatusClasses[seat.status] || "bg-gray-300"
                     }`}
                     style={position}

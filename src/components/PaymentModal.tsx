@@ -65,37 +65,37 @@ export default function PaymentModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-200 p-4">
-      <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-200 p-3 sm:p-4">
+      <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {paymentStatus === "pending" ? (
           <>
             {/* Header */}
-            <div className="sticky top-0 bg-gradient-to-r from-orange-500 to-orange-600 text-white p-6 rounded-t-3xl">
+            <div className="sticky top-0 bg-gradient-to-r from-orange-500 to-orange-600 text-white p-4 sm:p-6 rounded-t-2xl sm:rounded-t-3xl">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-bold mb-1">
+                  <h2 className="text-xl sm:text-2xl font-bold mb-1">
                     Thanh toán đơn hàng
                   </h2>
                   {tableNumber && (
-                    <p className="text-orange-100 text-sm">
+                    <p className="text-orange-100 text-xs sm:text-sm">
                       Bàn số: {tableNumber}
                     </p>
                   )}
                 </div>
                 <button
                   onClick={onClose}
-                  className="w-10 h-10 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors"
+                  className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors flex-shrink-0"
                 >
-                  <X className="w-6 h-6" />
+                  <X className="w-5 h-5 sm:w-6 sm:h-6" />
                 </button>
               </div>
             </div>
 
             {/* Content */}
-            <div className="p-6 space-y-6">
+            <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
               {/* Order Summary */}
-              <div className="bg-gray-50 rounded-2xl p-5">
-                <h3 className="font-bold text-gray-800 mb-4 text-lg">
+              <div className="bg-gray-50 rounded-xl sm:rounded-2xl p-4 sm:p-5">
+                <h3 className="font-bold text-gray-800 mb-3 sm:mb-4 text-base sm:text-lg">
                   Chi tiết đơn hàng
                 </h3>
                 <div className="space-y-3">
@@ -143,22 +143,22 @@ export default function PaymentModal({
 
               {/* QR Code */}
               <div className="text-center">
-                <h3 className="font-bold text-gray-800 mb-4 text-lg">
+                <h3 className="font-bold text-gray-800 mb-3 sm:mb-4 text-base sm:text-lg">
                   Quét mã QR để thanh toán
                 </h3>
-                <div className="inline-block bg-white p-6 rounded-2xl shadow-lg border-2 border-orange-200">
+                <div className="inline-block bg-white p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-lg border-2 border-orange-200">
                   <img
                     src={qrCodeUrl}
                     alt="QR Code"
-                    className="w-48 h-48 mx-auto"
+                    className="w-36 h-36 sm:w-48 sm:h-48 mx-auto"
                   />
                 </div>
-                <p className="text-gray-500 mt-4 text-sm">
+                <p className="text-gray-500 mt-3 sm:mt-4 text-xs sm:text-sm">
                   Sử dụng ứng dụng ngân hàng để quét mã QR
                 </p>
 
                 {/* Payment Methods */}
-                <div className="flex justify-center gap-4 mt-6">
+                <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mt-4 sm:mt-6">
                   <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
                     <img
                       src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/VietQR_Logo.svg/1200px-VietQR_Logo.svg.png?20250310160241"
@@ -184,14 +184,14 @@ export default function PaymentModal({
               </div>
 
               {/* Demo Button */}
-              <div className="text-center pt-4">
-                <p className="text-gray-500 text-sm mb-3">
-                  <Clock className="w-4 h-4 inline mr-1" />
+              <div className="text-center pt-3 sm:pt-4">
+                <p className="text-gray-500 text-xs sm:text-sm mb-2 sm:mb-3">
+                  <Clock className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1" />
                   Đang chờ thanh toán...
                 </p>
                 <button
                   onClick={handleConfirmPayment}
-                  className="px-8 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl font-bold hover:shadow-lg hover:shadow-green-500/30 transition-all"
+                  className="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg sm:rounded-xl font-bold text-sm sm:text-base hover:shadow-lg hover:shadow-green-500/30 transition-all"
                 >
                   Xác nhận đã thanh toán (Demo)
                 </button>
@@ -199,21 +199,21 @@ export default function PaymentModal({
             </div>
           </>
         ) : (
-          <div className="p-12 text-center">
-            <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="w-16 h-16 text-green-500" />
+          <div className="p-6 sm:p-8 lg:p-12 text-center">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+              <CheckCircle className="w-14 h-14 sm:w-16 sm:h-16 text-green-500" />
             </div>
-            <h2 className="text-3xl font-bold text-gray-800 mb-3">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2 sm:mb-3">
               Thanh toán thành công!
             </h2>
-            <p className="text-gray-600 mb-2">
+            <p className="text-gray-600 mb-2 text-sm sm:text-base">
               Cảm ơn bạn đã sử dụng dịch vụ của UniLife
             </p>
-            <p className="text-gray-500 text-sm">
+            <p className="text-gray-500 text-xs sm:text-sm">
               Tự động đóng sau {countdown} giây...
             </p>
-            <div className="mt-6 p-4 bg-green-50 rounded-xl">
-              <p className="font-semibold text-green-800">
+            <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-green-50 rounded-xl">
+              <p className="font-semibold text-green-800 text-sm sm:text-base">
                 Số tiền: {formatCurrency(totalAmount)}
               </p>
             </div>

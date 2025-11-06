@@ -182,30 +182,30 @@ export default function Table() {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 p-6">
-        <div className="flex gap-6 max-w-[1800px] mx-auto">
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 p-3 sm:p-6 pb-20 lg:pb-6">
+        <div className="flex flex-col lg:flex-row gap-3 sm:gap-6 max-w-[1800px] mx-auto">
           <Sidebar />
 
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <Navbar />
 
             {/* Cart Checkout Mode Banner */}
             {isCartCheckoutMode && currentCartItem && (
-              <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl shadow-lg p-6 mb-6 text-white">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-20 h-20 rounded-xl overflow-hidden bg-white shadow-md">
+              <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6 text-white">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
+                  <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg sm:rounded-xl overflow-hidden bg-white shadow-md flex-shrink-0">
                       <img
                         src={currentCartItem.image}
                         alt={currentCartItem.name}
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <div>
-                      <h3 className="text-2xl font-bold mb-1">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg sm:text-xl lg:text-2xl font-bold mb-1">
                         Chọn ghế cho: {currentCartItem.name}
                       </h3>
-                      <p className="text-orange-100">
+                      <p className="text-orange-100 text-sm sm:text-base">
                         Món {currentFoodIndex + 1} / {cartItems.length} - Chọn
                         bàn và ghế bên dưới
                       </p>
@@ -216,14 +216,14 @@ export default function Table() {
                       setIsCartCheckoutMode(false);
                       navigate("/");
                     }}
-                    className="px-6 py-3 bg-white/20 hover:bg-white/30 rounded-xl font-bold transition-all"
+                    className="px-4 sm:px-6 py-2 sm:py-3 bg-white/20 hover:bg-white/30 rounded-lg sm:rounded-xl font-bold transition-all text-sm sm:text-base w-full sm:w-auto"
                   >
                     Hủy
                   </button>
                 </div>
 
                 {/* Progress bar */}
-                <div className="mt-4 bg-white/20 rounded-full h-2">
+                <div className="mt-3 sm:mt-4 bg-white/20 rounded-full h-2">
                   <div
                     className="bg-white rounded-full h-2 transition-all duration-300"
                     style={{
@@ -236,12 +236,12 @@ export default function Table() {
               </div>
             )}
 
-            <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex gap-3">
+            <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-4 sm:mb-6">
+                <div className="flex gap-2 sm:gap-3 w-full sm:w-auto overflow-x-auto">
                   <button
                     onClick={() => setActiveTab("all")}
-                    className={`px-6 py-2.5 rounded-lg font-semibold transition-all ${
+                    className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg font-semibold transition-all whitespace-nowrap text-sm sm:text-base ${
                       activeTab === "all"
                         ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30"
                         : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -251,7 +251,7 @@ export default function Table() {
                   </button>
                   <button
                     onClick={() => setActiveTab("reservation")}
-                    className={`px-6 py-2.5 rounded-lg font-semibold transition-all ${
+                    className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg font-semibold transition-all whitespace-nowrap text-sm sm:text-base ${
                       activeTab === "reservation"
                         ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30"
                         : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -261,7 +261,7 @@ export default function Table() {
                   </button>
                   <button
                     onClick={() => setActiveTab("running")}
-                    className={`px-6 py-2.5 rounded-lg font-semibold transition-all ${
+                    className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg font-semibold transition-all whitespace-nowrap text-sm sm:text-base ${
                       activeTab === "running"
                         ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30"
                         : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -271,26 +271,34 @@ export default function Table() {
                   </button>
                 </div>
 
-                <div className="flex items-center gap-6">
+                <div className="grid grid-cols-2 sm:flex sm:flex-wrap lg:flex-nowrap items-center gap-3 sm:gap-4 lg:gap-6 w-full sm:w-auto">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-purple-400"></div>
-                    <span className="text-sm text-gray-600">Trống</span>
+                    <span className="text-xs sm:text-sm text-gray-600">
+                      Trống
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-orange-400"></div>
-                    <span className="text-sm text-gray-600">Đã đặt</span>
+                    <span className="text-xs sm:text-sm text-gray-600">
+                      Đã đặt
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-green-400"></div>
-                    <span className="text-sm text-gray-600">Đã tính tiền</span>
+                    <span className="text-xs sm:text-sm text-gray-600">
+                      Đã tính tiền
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-                    <span className="text-sm text-gray-600">Sắp trống</span>
+                    <span className="text-xs sm:text-sm text-gray-600">
+                      Sắp trống
+                    </span>
                   </div>
                 </div>
 
-                <button className="px-6 py-2.5 bg-white border-2 border-gray-200 rounded-lg font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
+                <button className="hidden lg:block px-6 py-2.5 bg-white border-2 border-gray-200 rounded-lg font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
                   Tạo đơn hàng
                 </button>
               </div>
