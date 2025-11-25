@@ -3,13 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { useAuth, useCart } from "../hooks/useContexts";
 import { useToast } from "../hooks/useToast";
 import { useState } from "react";
+import PaymentModal from "./PaymentModal";
 
 export default function CartSummary() {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
-  const { cartItems, updateQuantity } = useCart();
+  const { cartItems, updateQuantity, clearCart } = useCart();
   const toast = useToast();
   const [showMobileCart, setShowMobileCart] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   // Nếu chưa đăng nhập, hiển thị thông báo
   if (!isAuthenticated) {
@@ -64,10 +66,16 @@ export default function CartSummary() {
       toast.warning("Giỏ hàng trống! Vui lòng thêm món trước khi thanh toán.");
       return;
     }
-    // Chuyển sang trang Table để chọn ghế
-    navigate("/table", { state: { fromCart: true, cartItems } });
-    // Hiển thị thông báo hướng dẫn
-    toast.info("Vui lòng chọn bàn và ghế cho từng món ăn");
+    // Mở modal thanh toán trực tiếp
+    setShowPaymentModal(true);
+  };
+
+  const handlePaymentSuccess = () => {
+    // Xóa giỏ hàng sau khi thanh toán thành công
+    clearCart();
+    toast.success("Đặt hàng thành công! Vui lòng kiểm tra lịch sử đơn hàng.");
+    setShowPaymentModal(false);
+    setShowMobileCart(false);
   };
 
   return (
@@ -317,6 +325,20 @@ export default function CartSummary() {
           )}
         </>
       )}
+
+      {/* Payment Modal */}
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        totalAmount={total}
+        orderItems={cartItems.map((item) => ({
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price,
+          image: item.image,
+        }))}
+        onPaymentSuccess={handlePaymentSuccess}
+      />
     </div>
   );
 }

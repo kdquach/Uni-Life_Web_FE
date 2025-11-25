@@ -6,6 +6,7 @@ import {
   Soup,
   CalendarCheck,
   Wallet,
+  Package,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -35,6 +36,7 @@ export default function Sidebar() {
     },
     { icon: Soup, path: "/menu?category=sup", label: "Súp", category: "sup" },
     { icon: CalendarCheck, path: "/table", label: "Đặt bàn", category: "" },
+    { icon: Package, path: "/orders", label: "Đơn hàng", category: "" },
     { icon: Wallet, path: "/wallet", label: "Ví", category: "" },
   ];
 

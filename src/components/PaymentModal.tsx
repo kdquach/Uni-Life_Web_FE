@@ -1,5 +1,8 @@
 import { X, CheckCircle, Clock } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useAuth } from "../hooks/useContexts";
+import { orderStorage } from "../utils/orderStorage";
+import { Order } from "../types/order";
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -9,6 +12,7 @@ interface PaymentModalProps {
     name: string;
     quantity: number;
     price: number;
+    image?: string;
     seatInfo?: {
       tableId: string;
       seatId: string;
@@ -26,10 +30,21 @@ export default function PaymentModal({
   tableNumber,
   onPaymentSuccess,
 }: PaymentModalProps) {
+  const { user } = useAuth();
   const [paymentStatus, setPaymentStatus] = useState<"pending" | "success">(
     "pending"
   );
-  const [countdown, setCountdown] = useState(3);
+  const [countdown, setCountdown] = useState(10);
+  const [currentOrder, setCurrentOrder] = useState<Order | null>(null);
+
+  // Reset state khi modal mở
+  useEffect(() => {
+    if (isOpen) {
+      setPaymentStatus("pending");
+      setCountdown(10);
+      setCurrentOrder(null);
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (paymentStatus === "success" && countdown > 0) {
@@ -61,11 +76,51 @@ export default function PaymentModal({
   )}`;
 
   const handleConfirmPayment = () => {
+    if (!user) return;
+
+    // Tạo order ID và order number
+    const orderId = `ORD-${Date.now()}`;
+    const orderNumber = `#${Math.floor(Math.random() * 10000)
+      .toString()
+      .padStart(4, "0")}`;
+
+    // Tạo QR code cho bill
+    const billQRData = `unilife://order/${orderId}`;
+    const billQRUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(
+      billQRData
+    )}`;
+
+    // Tạo order object
+    const newOrder: Order = {
+      id: orderId,
+      orderNumber: orderNumber,
+      items: orderItems.map((item) => ({
+        id: Date.now() + Math.random(),
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        image: "", // Có thể thêm image URL nếu cần
+      })),
+      subtotal: subtotal,
+      tax: tax,
+      total: totalAmount,
+      status: "confirmed",
+      createdAt: new Date().toISOString(),
+      qrCode: billQRUrl,
+      userName: user.fullName,
+      userEmail: user.email,
+    };
+
+    // Lưu vào localStorage
+    orderStorage.saveOrder(newOrder);
+
+    // Cập nhật state
+    setCurrentOrder(newOrder);
     setPaymentStatus("success");
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-200 p-3 sm:p-4">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-3 sm:p-4">
       <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {paymentStatus === "pending" ? (
           <>
@@ -199,24 +254,171 @@ export default function PaymentModal({
             </div>
           </>
         ) : (
-          <div className="p-6 sm:p-8 lg:p-12 text-center">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
-              <CheckCircle className="w-14 h-14 sm:w-16 sm:h-16 text-green-500" />
+          <div className="p-4 sm:p-6 lg:p-8 text-center max-h-[90vh] overflow-y-auto">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+              <CheckCircle className="w-10 h-10 sm:w-12 sm:h-12 text-green-500" />
             </div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2 sm:mb-3">
-              Thanh toán thành công!
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">
+              Đặt hàng thành công!
             </h2>
-            <p className="text-gray-600 mb-2 text-sm sm:text-base">
-              Cảm ơn bạn đã sử dụng dịch vụ của UniLife
+            <p className="text-gray-600 mb-4 text-sm sm:text-base">
+              Mã đơn hàng:{" "}
+              <span className="font-bold text-orange-600">
+                {currentOrder?.orderNumber}
+              </span>
             </p>
-            <p className="text-gray-500 text-xs sm:text-sm">
-              Tự động đóng sau {countdown} giây...
-            </p>
-            <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-green-50 rounded-xl">
-              <p className="font-semibold text-green-800 text-sm sm:text-base">
-                Số tiền: {formatCurrency(totalAmount)}
+
+            {/* Bill QR Code with Food Images */}
+            {currentOrder && (
+              <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-4 sm:p-6 mb-4 relative overflow-hidden">
+                <h3 className="font-bold text-gray-800 mb-3 text-base sm:text-lg relative z-10">
+                  Chi tiết đơn hàng
+                </h3>
+
+                {/* Layout với QR code và hình ảnh món ăn */}
+                <div className="relative">
+                  {/* Grid chứa món ăn và QR */}
+                  <div className="grid grid-cols-2 gap-3 mb-3">
+                    {/* Món 1 - Top Left */}
+                    <div className="flex justify-start">
+                      {currentOrder.items[0] && (
+                        <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-4 border-white shadow-lg">
+                          <img
+                            src={
+                              orderItems[0]?.image ||
+                              "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200"
+                            }
+                            alt={currentOrder.items[0].name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Món 2 - Top Right */}
+                    <div className="flex justify-end">
+                      {currentOrder.items[1] && (
+                        <div className="w-32 h-32 sm:w-36 sm:h-36 rounded-full overflow-hidden border-4 border-white shadow-lg">
+                          <img
+                            src={
+                              orderItems[1]?.image ||
+                              "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=200"
+                            }
+                            alt={currentOrder.items[1].name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* QR Code ở giữa */}
+                  <div className="flex justify-center -mt-6 mb-3 relative z-20">
+                    <div className="bg-white p-3 sm:p-4 rounded-2xl border-4 border-orange-300 shadow-2xl">
+                      <img
+                        src={currentOrder.qrCode}
+                        alt="Bill QR Code"
+                        className="w-40 h-40 sm:w-48 sm:h-48"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Grid chứa món ăn phía dưới */}
+                  <div className="grid grid-cols-2 gap-3 -mt-6">
+                    {/* Món 3 - Bottom Left */}
+                    <div className="flex justify-start items-end">
+                      {currentOrder.items[2] && (
+                        <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 border-white shadow-lg">
+                          <img
+                            src={
+                              orderItems[2]?.image ||
+                              "https://images.unsplash.com/photo-1586190848861-99aa4a171e90?w=200"
+                            }
+                            alt={currentOrder.items[2].name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Món 4 - Bottom Right */}
+                    <div className="flex justify-end items-end">
+                      {currentOrder.items[3] && (
+                        <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 border-white shadow-lg">
+                          <img
+                            src={
+                              orderItems[3]?.image ||
+                              "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=200"
+                            }
+                            alt={currentOrder.items[3].name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-gray-600 mt-4 text-xs sm:text-sm text-center relative z-10">
+                  Sử dụng ứng dụng ngân hàng để quét mã QR
+                </p>
+              </div>
+            )}
+
+            {/* Order Summary */}
+            <div className="bg-gray-50 rounded-xl p-4 mb-4 text-left">
+              <h3 className="font-bold text-gray-800 mb-3 text-sm sm:text-base">
+                Chi tiết đơn hàng
+              </h3>
+              <div className="space-y-2 text-xs sm:text-sm">
+                {currentOrder?.items.map((item, index) => (
+                  <div key={index} className="flex justify-between">
+                    <span className="text-gray-600">
+                      {item.name} x{item.quantity}
+                    </span>
+                    <span className="font-semibold text-gray-800">
+                      {formatCurrency(item.price * item.quantity)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <div className="border-t border-gray-200 mt-3 pt-3">
+                <div className="flex justify-between text-xs sm:text-sm text-gray-600 mb-1">
+                  <span>Tạm tính</span>
+                  <span>{formatCurrency(currentOrder?.subtotal || 0)}</span>
+                </div>
+                <div className="flex justify-between text-xs sm:text-sm text-gray-600 mb-2">
+                  <span>Thuế (10%)</span>
+                  <span>{formatCurrency(currentOrder?.tax || 0)}</span>
+                </div>
+                <div className="flex justify-between text-base sm:text-lg font-bold text-orange-600">
+                  <span>Tổng cộng</span>
+                  <span>{formatCurrency(totalAmount)}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Info */}
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 sm:p-4 mb-4">
+              <p className="text-blue-800 text-xs sm:text-sm">
+                💡 <strong>Lưu ý:</strong> Bạn có thể xem lại đơn hàng này trong
+                phần <strong>Lịch sử đơn hàng</strong>
               </p>
             </div>
+
+            <p className="text-gray-500 text-xs sm:text-sm mb-3">
+              Tự động đóng sau {countdown} giây...
+            </p>
+
+            <button
+              onClick={() => {
+                onPaymentSuccess();
+                onClose();
+              }}
+              className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 rounded-xl font-bold hover:shadow-lg transition-all"
+            >
+              Đóng
+            </button>
           </div>
         )}
       </div>

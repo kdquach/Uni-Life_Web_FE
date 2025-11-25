@@ -29,13 +29,13 @@ export default function Wallet() {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
   const toast = useToast();
-  const [balance] = useState(500000); // Mock balance
+  const [balance, setBalance] = useState(500000); // Mock balance
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [amount, setAmount] = useState("");
 
   // Mock transaction history
-  const [transactions] = useState<Transaction[]>([
+  const [transactions, setTransactions] = useState<Transaction[]>([
     {
       id: "1",
       type: "deposit",
@@ -87,8 +87,27 @@ export default function Wallet() {
       toast.warning("Vui lòng nhập số tiền hợp lệ");
       return;
     }
-    // TODO: Implement deposit API
-    toast.success(`Nạp ${formatCurrency(parseFloat(amount))} thành công!`);
+
+    const depositAmount = parseFloat(amount);
+
+    // Cộng tiền vào ví
+    setBalance((prevBalance) => prevBalance + depositAmount);
+
+    // Thêm transaction vào lịch sử
+    const newTransaction: Transaction = {
+      id: Date.now().toString(),
+      type: "deposit",
+      amount: depositAmount,
+      description: "Nạp tiền vào ví",
+      date: new Date().toISOString(),
+      status: "completed",
+    };
+    setTransactions((prevTransactions) => [
+      newTransaction,
+      ...prevTransactions,
+    ]);
+
+    toast.success(`Nạp ${formatCurrency(depositAmount)} thành công!`);
     setShowDepositModal(false);
     setAmount("");
   };
@@ -98,12 +117,32 @@ export default function Wallet() {
       toast.warning("Vui lòng nhập số tiền hợp lệ");
       return;
     }
-    if (parseFloat(amount) > balance) {
+
+    const withdrawAmount = parseFloat(amount);
+
+    if (withdrawAmount > balance) {
       toast.error("Số dư không đủ!");
       return;
     }
-    // TODO: Implement withdraw API
-    toast.success(`Rút ${formatCurrency(parseFloat(amount))} thành công!`);
+
+    // Trừ tiền khỏi ví
+    setBalance((prevBalance) => prevBalance - withdrawAmount);
+
+    // Thêm transaction vào lịch sử
+    const newTransaction: Transaction = {
+      id: Date.now().toString(),
+      type: "withdraw",
+      amount: -withdrawAmount,
+      description: "Rút tiền từ ví",
+      date: new Date().toISOString(),
+      status: "completed",
+    };
+    setTransactions((prevTransactions) => [
+      newTransaction,
+      ...prevTransactions,
+    ]);
+
+    toast.success(`Rút ${formatCurrency(withdrawAmount)} thành công!`);
     setShowWithdrawModal(false);
     setAmount("");
   };

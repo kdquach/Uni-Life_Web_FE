@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import Wallet from "./pages/Wallet";
+import OrderHistory from "./pages/OrderHistory";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
               <Route path="/table" element={<Table />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/wallet" element={<Wallet />} />
+              <Route path="/orders" element={<OrderHistory />} />
             </Routes>
           </Router>
         </ToastProvider>
