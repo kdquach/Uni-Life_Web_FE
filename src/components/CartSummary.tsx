@@ -2,7 +2,7 @@ import { Minus, Plus, ShoppingCart, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth, useCart } from "../hooks/useContexts";
 import { useToast } from "../hooks/useToast";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import PaymentModal from "./PaymentModal";
 
 export default function CartSummary() {
@@ -12,6 +12,7 @@ export default function CartSummary() {
   const toast = useToast();
   const [showMobileCart, setShowMobileCart] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const isProcessing = useRef(false);
 
   // Nếu chưa đăng nhập, hiển thị thông báo
   if (!isAuthenticated) {
@@ -70,12 +71,25 @@ export default function CartSummary() {
     setShowPaymentModal(true);
   };
 
-  const handlePaymentSuccess = () => {
-    // Xóa giỏ hàng sau khi thanh toán thành công
-    clearCart();
-    toast.success("Đặt hàng thành công! Vui lòng kiểm tra lịch sử đơn hàng.");
+  const handlePaymentSuccess = async () => {
+    // Tránh gọi nhiều lần
+    if (isProcessing.current) return;
+    isProcessing.current = true;
+
+    // Đóng modal trước để tránh lag
     setShowPaymentModal(false);
     setShowMobileCart(false);
+
+    // Xóa giỏ hàng sau khi thanh toán thành công
+    await clearCart();
+
+    // Hiển thị toast sau khi xóa giỏ hàng xong
+    toast.success("Đặt hàng thành công! Vui lòng kiểm tra lịch sử đơn hàng.");
+
+    // Reset flag sau 1 giây
+    setTimeout(() => {
+      isProcessing.current = false;
+    }, 1000);
   };
 
   return (

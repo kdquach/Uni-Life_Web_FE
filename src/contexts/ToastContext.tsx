@@ -22,11 +22,16 @@ interface ToastData {
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastData[]>([]);
+  const MAX_TOASTS = 3; // Giới hạn tối đa 3 toast cùng lúc
 
   const showToast = useCallback(
     (message: string, type: ToastType = "info", duration: number = 3000) => {
       const id = Date.now();
-      setToasts((prev) => [...prev, { id, message, type, duration }]);
+      setToasts((prev) => {
+        const newToasts = [...prev, { id, message, type, duration }];
+        // Giữ chỉ MAX_TOASTS toast mới nhất
+        return newToasts.slice(-MAX_TOASTS);
+      });
     },
     []
   );

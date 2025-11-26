@@ -34,15 +34,17 @@ export default function PaymentModal({
   const [paymentStatus, setPaymentStatus] = useState<"pending" | "success">(
     "pending"
   );
-  const [countdown, setCountdown] = useState(10);
+  const [countdown, setCountdown] = useState(3);
   const [currentOrder, setCurrentOrder] = useState<Order | null>(null);
+  const [hasCalledSuccess, setHasCalledSuccess] = useState(false);
 
   // Reset state khi modal mở
   useEffect(() => {
     if (isOpen) {
       setPaymentStatus("pending");
-      setCountdown(10);
+      setCountdown(3);
       setCurrentOrder(null);
+      setHasCalledSuccess(false);
     }
   }, [isOpen]);
 
@@ -50,11 +52,16 @@ export default function PaymentModal({
     if (paymentStatus === "success" && countdown > 0) {
       const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
       return () => clearTimeout(timer);
-    } else if (paymentStatus === "success" && countdown === 0) {
+    } else if (
+      paymentStatus === "success" &&
+      countdown === 0 &&
+      !hasCalledSuccess
+    ) {
+      setHasCalledSuccess(true);
       onPaymentSuccess();
       onClose();
     }
-  }, [paymentStatus, countdown, onPaymentSuccess, onClose]);
+  }, [paymentStatus, countdown, onPaymentSuccess, onClose, hasCalledSuccess]);
 
   if (!isOpen) return null;
 
